@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: ruby:2.4
         environment:
-          CODECLIMATE_REPO_TOKEN: "d95f1200dc240490352a6e5d21dc218d02c1bddb77d710b5ebc436ecb07e43bc"
+          CC_TEST_REPORTER_ID: "d95f1200dc240490352a6e5d21dc218d02c1bddb77d710b5ebc436ecb07e43bc"
     steps:
       - checkout
       - type: cache-restore
@@ -15,4 +15,16 @@ jobs:
         key: example-foobar-{{ checksum "Gemfile.lock" }}
         paths:
           - vendor/bundle
-      - run: bundle exec rspec && bundle exec codeclimate-test-reporter
+      - run:
+          name: Setup Code Climate test-reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+      - run:
+          name: Run tests
+          command: |
+            ./cc-test-reporter before-build
+            bundle exec rspec
+            ./cc-test-reporter after-build
+
+
